@@ -1,0 +1,79 @@
+{
+  "name": "@unifyverse/atlas-core",
+  "version": "0.1.0-alpha.0",
+  "description": "Atlas Core: typed abstract protocol contract for cross-chain swap and bridge routing in the Tether WDK ecosystem. Types, constants, errors, and the AtlasProtocol abstract class only — no runtime, no aggregator adapters.",
+  "keywords": [
+    "wdk",
+    "atlas",
+    "protocol",
+    "swap",
+    "bridge",
+    "cross-chain",
+    "routing",
+    "abstract",
+    "types"
+  ],
+  "author": "UnifyVerse B.V.",
+  "license": "Apache-2.0",
+  "type": "module",
+  "main": "index.js",
+  "files": [
+    "index.js",
+    "bare.js",
+    "src/",
+    "types/",
+    "SCHEMA.md",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build:types": "tsc",
+    "lint": "standard",
+    "lint:fix": "standard --fix",
+    "test": "brittle tests/**/*.test.js"
+  },
+  "dependencies": {
+    "bare-node-runtime": "^1.1.4"
+  },
+  "devDependencies": {
+    "brittle": "3.19.1",
+    "standard": "17.1.2",
+    "typescript": "5.8.3"
+  },
+  "exports": {
+    ".": {
+      "types": "./types/index.d.ts",
+      "bare": "./bare.js",
+      "default": "./index.js"
+    },
+    "./package": {
+      "default": "./package.json"
+    }
+  },
+  "sideEffects": false,
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "standard": {
+    "ignore": [
+      "bare.js",
+      "tests/**/*.js",
+      "types/"
+    ]
+  },
+  "directories": {
+    "test": "tests"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/unifyverse/atlas-core.git"
+  },
+  "bugs": {
+    "url": "https://github.com/unifyverse/atlas-core/issues"
+  },
+  "homepage": "https://github.com/unifyverse/atlas-core#readme"
+}
