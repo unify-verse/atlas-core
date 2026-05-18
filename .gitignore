@@ -1,0 +1,10 @@
+node_modules/
+types/
+
+*.log
+*.tgz
+
+.DS_Store
+
+.env
+.env.*

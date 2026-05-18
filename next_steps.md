@@ -17,8 +17,8 @@ Local, do this first whether you're going private or public.
    No entry should remain ambiguous before adapters start.
 
 2. **Confirm the npm scope.** Today the package name is
-   `@unifyverse/atlas-core` (placeholder, Q20). Decide one of:
-   - Stay `@unifyverse/atlas-core` (publish under your scope).
+   `@unifyverse-exchange/atlas-core` (placeholder, Q20). Decide one of:
+   - Stay `@unifyverse-exchange/atlas-core` (publish under your scope).
    - Move to `@tetherto/wdk-atlas-core` (publish under Tether).
    - Move to a private scope (e.g. `@unifyverse-internal/atlas-core`).
 
@@ -64,8 +64,8 @@ without committing to a public version.
    }
    ```
 2. The package `name` must include the GitHub org/user as the npm
-   scope. Example: `@unifyverse/atlas-core` published to GitHub will
-   live at `npm.pkg.github.com/@unifyverse/atlas-core`.
+   scope. Example: `@unifyverse-exchange/atlas-core` published to GitHub will
+   live at `npm.pkg.github.com/@unifyverse-exchange/atlas-core`.
 3. Create a GitHub Personal Access Token with `write:packages` and
    `read:packages` scopes. Save to `~/.npmrc`:
    ```ini
@@ -130,14 +130,14 @@ adapters. Migrate to a registry once you have ≥ 3 consumers.
 ## Phase D — Consume Atlas Core from another WDK module
 
 This is the integration recipe for a wallet package
-(e.g. `@unifyverse/wdk-wallet-evm-cross-chain`) or an adapter package
-(e.g. `@unifyverse/atlas-adapter-rango`).
+(e.g. `@unifyverse-exchange/wdk-wallet-evm-cross-chain`) or an adapter package
+(e.g. `@unifyverse-exchange/atlas-adapter-rango`).
 
 ### D.1 Install
 
 Registry-based:
 ```sh
-npm install @unifyverse/atlas-core
+npm install @unifyverse-exchange/atlas-core
 ```
 
 Git-based (Phase B3):
@@ -162,18 +162,18 @@ import AtlasProtocol, {
   TransactionKind,
   FeeKind,
   AtlasStatus
-} from '@unifyverse/atlas-core'
+} from '@unifyverse-exchange/atlas-core'
 
-/** @typedef {import('@unifyverse/atlas-core').QuoteInput} QuoteInput */
-/** @typedef {import('@unifyverse/atlas-core').Quote} Quote */
-/** @typedef {import('@unifyverse/atlas-core').Route} Route */
-/** @typedef {import('@unifyverse/atlas-core').RoutePreparation} RoutePreparation */
-/** @typedef {import('@unifyverse/atlas-core').RouteExecution} RouteExecution */
+/** @typedef {import('@unifyverse-exchange/atlas-core').QuoteInput} QuoteInput */
+/** @typedef {import('@unifyverse-exchange/atlas-core').Quote} Quote */
+/** @typedef {import('@unifyverse-exchange/atlas-core').Route} Route */
+/** @typedef {import('@unifyverse-exchange/atlas-core').RoutePreparation} RoutePreparation */
+/** @typedef {import('@unifyverse-exchange/atlas-core').RouteExecution} RouteExecution */
 
 export default class RangoProtocol extends AtlasProtocol {
   /**
    * @param {import('@tetherto/wdk-wallet-evm').WalletAccountEvm} account
-   * @param {import('@unifyverse/atlas-core').AtlasProtocolConfig & { apiKey: string }} config
+   * @param {import('@unifyverse-exchange/atlas-core').AtlasProtocolConfig & { apiKey: string }} config
    */
   constructor (account, config) {
     super(account, config)
@@ -208,11 +208,11 @@ Adapter package `package.json` essentials:
 
 ```jsonc
 {
-  "name": "@unifyverse/atlas-adapter-rango",
+  "name": "@unifyverse-exchange/atlas-adapter-rango",
   "type": "module",
   "main": "index.js",
   "dependencies": {
-    "@unifyverse/atlas-core": "^0.1.0-alpha.0",
+    "@unifyverse-exchange/atlas-core": "^0.1.0-alpha.0",
     "@tetherto/wdk-wallet-evm": "^1.0.0-beta.12",
     "bare-node-runtime": "^1.1.4",
     "ethers": "6.13.5"
@@ -230,7 +230,7 @@ Adapter package `package.json` essentials:
 ### D.3 Wallet integration — how end users see it
 
 ```js
-import RangoProtocol from '@unifyverse/atlas-adapter-rango'
+import RangoProtocol from '@unifyverse-exchange/atlas-adapter-rango'
 import { WalletAccountEvm } from '@tetherto/wdk-wallet-evm'
 
 const wallet = /* construct your WDK wallet account */ null

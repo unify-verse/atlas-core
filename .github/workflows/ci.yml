@@ -1,0 +1,102 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    name: lint + build:types + test (node ${{ matrix.node }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        node: ['20', '22']
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+          cache: npm
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run build:types
+      - run: npm test
+
+  audit:
+    name: npm audit (moderate+)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+      - run: npm ci
+      - run: npm audit --audit-level=moderate
+
+  install-script-scan:
+    name: reject install/preinstall/postinstall hooks
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+      - run: npm ci --ignore-scripts
+      - name: Fail if any installed dep declares install hooks
+        run: |
+          hits=$(find node_modules -name package.json -not -path '*/test/*' -not -path '*/tests/*' -not -path '*/fixtures/*' \
+            -exec grep -lE '"(preinstall|install|postinstall)"[[:space:]]*:' {} + || true)
+          if [ -n "$hits" ]; then
+            echo "::error::Install hooks detected in installed deps:"
+            echo "$hits"
+            exit 1
+          fi
+
+  socket-security-scan:
+    name: socket.dev supply-chain scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+      - name: Run Socket CLI scan
+        env:
+          SOCKET_SECURITY_API_KEY: ${{ secrets.SOCKET_SEC_TOKEN }}
+        run: npx --yes @socketsecurity/cli@latest ci
+
+  lockfile-provenance:
+    name: lockfile registry + integrity
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Verify all lockfile entries resolved from npm registry with integrity
+        run: |
+          node -e '
+            const lock = JSON.parse(require("fs").readFileSync("package-lock.json","utf8"));
+            let bad = 0;
+            for (const [p, info] of Object.entries(lock.packages || {})) {
+              if (!p || info.link || !info.resolved) continue;
+              if (!info.resolved.startsWith("https://registry.npmjs.org/")) {
+                console.error("non-npm source:", p, info.resolved); bad++;
+              }
+              if (!info.integrity) {
+                console.error("missing integrity:", p); bad++;
+              }
+            }
+            if (bad > 0) { console.error("lockfile provenance failed (" + bad + " entries)"); process.exit(1); }
+            console.log("lockfile provenance OK");
+          '

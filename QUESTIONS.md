@@ -415,7 +415,7 @@ Per-leg caps are deferred; introduce only on user request.
 The grant draft scopes M1 as "design only". This file is M1's
 deliverable. Confirm that Atlas Core v1 *does not* include any
 aggregator adapter — the Rango adapter is a separate package that
-will depend on `@unifyverse/atlas-core`.
+will depend on `@unifyverse-exchange/atlas-core`.
 
 R: Confirmed by the prompt. This package exports only types,
 constants, errors, and the abstract `AtlasProtocol` class. Adapters
@@ -428,7 +428,7 @@ live in sibling packages and extend `AtlasProtocol`.
 The grant draft uses "CoffeeRoute". The prompt uses "Atlas Core".
 The working directory is `first-module-impl/`. Which name ships?
 
-R: Recommend `@unifyverse/atlas-core` (npm-publishable scoped name)
+R: Recommend `@unifyverse-exchange/atlas-core` (npm-publishable scoped name)
 until Tether allocates a `@tetherto/*` scope. Defer scope decision to
-reviewer. `package.json.name` below uses `@unifyverse/atlas-core` as a
+reviewer. `package.json.name` below uses `@unifyverse-exchange/atlas-core` as a
 placeholder.

@@ -1,0 +1,98 @@
+name: Publish (GitHub Packages)
+
+on:
+  push:
+    tags:
+      - 'v[0-9]+.[0-9]+.[0-9]+'
+      - 'v[0-9]+.[0-9]+.[0-9]+-*'
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    name: re-verify + security
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run build:types
+      - run: npm test
+      - run: npm audit --audit-level=moderate
+      - name: Reject install hooks
+        run: |
+          hits=$(find node_modules -name package.json -not -path '*/test/*' -not -path '*/tests/*' -not -path '*/fixtures/*' \
+            -exec grep -lE '"(preinstall|install|postinstall)"[[:space:]]*:' {} + || true)
+          if [ -n "$hits" ]; then echo "$hits"; exit 1; fi
+      - name: Lockfile provenance
+        run: |
+          node -e '
+            const lock = JSON.parse(require("fs").readFileSync("package-lock.json","utf8"));
+            let bad = 0;
+            for (const [p, info] of Object.entries(lock.packages || {})) {
+              if (!p || info.link || !info.resolved) continue;
+              if (!info.resolved.startsWith("https://registry.npmjs.org/")) { console.error("non-npm:", p); bad++; }
+              if (!info.integrity) { console.error("no-integrity:", p); bad++; }
+            }
+            if (bad > 0) process.exit(1);
+          '
+      - name: Socket CLI scan
+        env:
+          SOCKET_SECURITY_API_KEY: ${{ secrets.SOCKET_SEC_TOKEN }}
+        run: npx --yes @socketsecurity/cli@latest ci
+
+  publish:
+    name: publish to GitHub Packages
+    needs: verify
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      packages: write
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: Read scope from package.json
+        id: meta
+        run: |
+          NAME=$(node -p "require('./package.json').name")
+          VERSION=$(node -p "require('./package.json').version")
+          PROTO=$(node -p "require('./src/constants.js').ATLAS_PROTOCOL_VERSION" --input-type=module 2>/dev/null \
+            || node --input-type=module -e "import('./src/constants.js').then(m => process.stdout.write(m.ATLAS_PROTOCOL_VERSION))")
+          SCOPE=${NAME%%/*}
+          TAG_VERSION=${GITHUB_REF_NAME#v}
+          echo "name=$NAME"          >> $GITHUB_OUTPUT
+          echo "version=$VERSION"    >> $GITHUB_OUTPUT
+          echo "proto=$PROTO"        >> $GITHUB_OUTPUT
+          echo "scope=$SCOPE"        >> $GITHUB_OUTPUT
+          echo "tagVersion=$TAG_VERSION" >> $GITHUB_OUTPUT
+      - name: Verify tag == package.json.version == ATLAS_PROTOCOL_VERSION
+        run: |
+          echo "tag=${{ steps.meta.outputs.tagVersion }} pkg=${{ steps.meta.outputs.version }} proto=${{ steps.meta.outputs.proto }}"
+          if [ "${{ steps.meta.outputs.tagVersion }}" != "${{ steps.meta.outputs.version }}" ]; then
+            echo "::error::git tag does not match package.json version"; exit 1
+          fi
+          if [ "${{ steps.meta.outputs.version }}" != "${{ steps.meta.outputs.proto }}" ]; then
+            echo "::error::package.json version does not match ATLAS_PROTOCOL_VERSION"; exit 1
+          fi
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+          registry-url: 'https://npm.pkg.github.com'
+          scope: ${{ steps.meta.outputs.scope }}
+      - run: npm ci
+      - name: npm publish --provenance
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: npm publish --provenance
+      - name: npm pack (for release attachment)
+        run: npm pack
+      - uses: softprops/action-gh-release@v2
+        with:
+          generate_release_notes: true
+          files: '*.tgz'

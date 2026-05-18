@@ -17,7 +17,7 @@ It does not ship a runtime, an HTTP client, an aggregator adapter, or
 any cryptographic code. Zero runtime dependencies for the Node entry.
 The Bare entry (`bare.js`) requires `bare-node-runtime`, which is the
 only runtime dependency and is needed only when running under Bare.
-Adapters live in sibling packages (`@unifyverse/atlas-adapter-rango`,
+Adapters live in sibling packages (`@unifyverse-exchange/atlas-adapter-rango`,
 …) and import these types.
 
 ---
