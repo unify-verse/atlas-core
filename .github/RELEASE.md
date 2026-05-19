@@ -8,9 +8,9 @@ triggered by pushing a `v*` git tag.
 The npm scope in `package.json#name` must match the GitHub repo owner.
 GitHub Packages rejects publishes where they differ.
 
-- Repo: `github.com/unifyverse-exchange/atlas-core` (also accessible
-  via `git@github.com:unifyverse-exchange/atlas-core.git`).
-- Package: `@unifyverse-exchange/atlas-core`.
+- Repo: `github.com/unify-verse/atlas-core` (also accessible
+  via `git@github.com:unify-verse/atlas-core.git`).
+- Package: `@unify-verse/atlas-core`.
 
 ## Cutting a release
 
@@ -39,10 +39,10 @@ GitHub Packages rejects publishes where they differ.
 
 Consumers add to `~/.npmrc`:
 ```ini
-@unifyverse-exchange:registry=https://npm.pkg.github.com/
+@unify-verse:registry=https://npm.pkg.github.com/
 //npm.pkg.github.com/:_authToken=<github_token_with_read:packages>
 ```
-Then: `npm install @unifyverse-exchange/atlas-core`.
+Then: `npm install @unify-verse/atlas-core`.
 
 ## No long-lived tokens
 

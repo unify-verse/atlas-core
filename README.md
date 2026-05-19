@@ -1,4 +1,4 @@
-# @unifyverse-exchange/atlas-core
+# @unify-verse/atlas-core
 
 > Atlas Core: typed abstract protocol contract for cross-chain swap and bridge routing in the Tether WDK ecosystem.
 
@@ -40,7 +40,7 @@ The contract is `quote()` → `prepare()` → caller signs and broadcasts
 via the WDK wallet → `getStatus()`. Atlas never signs or broadcasts.
 
 ```js
-import AtlasProtocol, { KnownChain } from '@unifyverse-exchange/atlas-core'
+import AtlasProtocol, { KnownChain } from '@unify-verse/atlas-core'
 
 // `AtlasProtocol` is the abstract base; use a concrete adapter in practice.
 const atlas = new ConcreteAdapter(walletAccount)

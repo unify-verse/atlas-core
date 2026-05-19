@@ -164,7 +164,7 @@ reference module, and the WDK `AGENTS.md` checklist.
 ### 3.8 Scope and publishing
 
 - Production scope is `@tetherto/*`. Current placeholder is
-  `@unifyverse-exchange/atlas-core` (Q20). Confirm with Tether before tagging
+  `@unify-verse/atlas-core` (Q20). Confirm with Tether before tagging
   v1.
 
 ---
@@ -207,7 +207,7 @@ If any of these change, update QUESTIONS.md AND this section.
 - **JSON / bigint (Q17)**: no codec in v1.
 - **Fee cap (Q18)**: per-route `maxFeeNative` only; no per-leg cap.
 - **Scope (Q19)**: zero adapter code in v1.
-- **Name (Q20)**: `@unifyverse-exchange/atlas-core` placeholder.
+- **Name (Q20)**: `@unify-verse/atlas-core` placeholder.
 
 ---
 

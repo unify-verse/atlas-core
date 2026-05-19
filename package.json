@@ -1,5 +1,5 @@
 {
-  "name": "@unifyverse-exchange/atlas-core",
+  "name": "@unify-verse/atlas-core",
   "version": "0.1.0-alpha.0",
   "description": "Atlas Core: typed abstract protocol contract for cross-chain swap and bridge routing in the Tether WDK ecosystem. Types, constants, errors, and the AtlasProtocol abstract class only — no runtime, no aggregator adapters.",
   "keywords": [
@@ -72,10 +72,10 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/unifyverse-exchange/atlas-core.git"
+    "url": "git+https://github.com/unify-verse/atlas-core.git"
   },
   "bugs": {
-    "url": "https://github.com/unifyverse-exchange/atlas-core/issues"
+    "url": "https://github.com/unify-verse/atlas-core/issues"
   },
-  "homepage": "https://github.com/unifyverse-exchange/atlas-core#readme"
+  "homepage": "https://github.com/unify-verse/atlas-core#readme"
 }

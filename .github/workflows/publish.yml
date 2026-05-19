@@ -8,6 +8,7 @@ on:
 
 permissions:
   contents: read
+  packages: read
 
 jobs:
   verify:
@@ -18,8 +19,16 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
-          cache: npm
-      - run: npm ci
+          registry-url: 'https://npm.pkg.github.com'
+          scope: '@unify-verse'
+      - env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          if [ -f package-lock.json ]; then
+            npm ci
+          else
+            npm install --no-audit --no-fund
+          fi
       - run: npm run lint
       - run: npm run build:types
       - run: npm test
@@ -31,12 +40,17 @@ jobs:
           if [ -n "$hits" ]; then echo "$hits"; exit 1; fi
       - name: Lockfile provenance
         run: |
+          if [ ! -f package-lock.json ]; then
+            echo "::error::Tagged publish requires a committed package-lock.json"
+            exit 1
+          fi
           node -e '
             const lock = JSON.parse(require("fs").readFileSync("package-lock.json","utf8"));
+            const okPrefixes = ["https://registry.npmjs.org/","https://npm.pkg.github.com/"];
             let bad = 0;
             for (const [p, info] of Object.entries(lock.packages || {})) {
               if (!p || info.link || !info.resolved) continue;
-              if (!info.resolved.startsWith("https://registry.npmjs.org/")) { console.error("non-npm:", p); bad++; }
+              if (!okPrefixes.some(pfx => info.resolved.startsWith(pfx))) { console.error("non-approved:", p); bad++; }
               if (!info.integrity) { console.error("no-integrity:", p); bad++; }
             }
             if (bad > 0) process.exit(1);
@@ -61,14 +75,13 @@ jobs:
         run: |
           NAME=$(node -p "require('./package.json').name")
           VERSION=$(node -p "require('./package.json').version")
-          PROTO=$(node -p "require('./src/constants.js').ATLAS_PROTOCOL_VERSION" --input-type=module 2>/dev/null \
-            || node --input-type=module -e "import('./src/constants.js').then(m => process.stdout.write(m.ATLAS_PROTOCOL_VERSION))")
+          PROTO=$(node --input-type=module -e "import('./src/constants.js').then(m => process.stdout.write(m.ATLAS_PROTOCOL_VERSION))")
           SCOPE=${NAME%%/*}
           TAG_VERSION=${GITHUB_REF_NAME#v}
-          echo "name=$NAME"          >> $GITHUB_OUTPUT
-          echo "version=$VERSION"    >> $GITHUB_OUTPUT
-          echo "proto=$PROTO"        >> $GITHUB_OUTPUT
-          echo "scope=$SCOPE"        >> $GITHUB_OUTPUT
+          echo "name=$NAME"             >> $GITHUB_OUTPUT
+          echo "version=$VERSION"       >> $GITHUB_OUTPUT
+          echo "proto=$PROTO"           >> $GITHUB_OUTPUT
+          echo "scope=$SCOPE"           >> $GITHUB_OUTPUT
           echo "tagVersion=$TAG_VERSION" >> $GITHUB_OUTPUT
       - name: Verify tag == package.json.version == ATLAS_PROTOCOL_VERSION
         run: |
@@ -82,10 +95,16 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
-          cache: npm
           registry-url: 'https://npm.pkg.github.com'
           scope: ${{ steps.meta.outputs.scope }}
-      - run: npm ci
+      - env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          if [ -f package-lock.json ]; then
+            npm ci
+          else
+            npm install --no-audit --no-fund
+          fi
       - name: npm publish --provenance
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
